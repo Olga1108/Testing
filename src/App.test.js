@@ -2,8 +2,23 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 import userEvent from '@testing-library/user-event';
 
+beforeEach(() => {
+  render(<App />)
+});
+
+afterEach(() => {
+  console.log('This will run after each test')
+});
+
+beforeAll(() => {
+  console.log('This will run before all tests')
+});
+
+afterAll(() => {
+  console.log('This will run after all of the test')
+});
+
 test('inputs should be initially empty', () => {
-  render(<App />);
   const emailInputElement = screen.getByRole('textbox');
   const passwordInputElement = screen.getByLabelText('Password');
   const confirmPasswordInputElement = screen.getByLabelText(/Confirm password/i)
@@ -13,7 +28,6 @@ test('inputs should be initially empty', () => {
 });
 
 test('should be able to type an email', () => {
-  render(<App/>)
   const emailInputElement = screen.getByRole('textbox', {
     name: /email/i
   }); 
@@ -22,21 +36,18 @@ test('should be able to type an email', () => {
 });
 
 test('should be able to type a password', () => {
-  render(<App/>);
   const passwordInputElement = screen.getByLabelText('Password'); 
   userEvent.type(passwordInputElement, 'password!');
   expect(passwordInputElement.value).toBe('password!');
 });
 
 test('should be able to type a confirm password', () => {
-  render(<App/>);
   const confirmPasswordInputElement = screen.getByLabelText(/Confirm password/i); 
   userEvent.type(confirmPasswordInputElement, 'password!');
   expect(confirmPasswordInputElement.value).toBe('password!');
 });
 
 test('should shown email error message on invalid email', () => {
-  render(<App/>)
   const emailErrorElement = screen.queryByText(/the email you input is invalid/i)
   const emailInputElement = screen.getByRole('textbox', {
     name: /email/i
@@ -51,7 +62,6 @@ test('should shown email error message on invalid email', () => {
 });
 
 test('should show password error if password is less than 5 characters', () => {
-  render(<App/>)
   
   const emailInputElement = screen.getByRole('textbox', {
     name: /email/i
@@ -67,3 +77,20 @@ test('should show password error if password is less than 5 characters', () => {
   userEvent.click(submitBtnElement);
 });
 
+test("should show confirm password error if password don't match", () => {
+  
+  const emailInputElement = screen.getByRole('textbox', {
+    name: /email/i
+  });
+  const passwordInputElement = screen.getByLabelText('Password');
+  const confirmPasswordInputElement = screen.getByLabelText(/confirm password/i); 
+  const confirmPasswordErrorElement = screen.queryByText(/the passwords don't match. try again/i)
+  const submitBtnElement = screen.getByRole('button', {
+    name: /submit/i
+  });
+  userEvent.type(emailInputElement, 'olha@gmail.com');
+  userEvent.type(passwordInputElement, '12345');
+  expect(confirmPasswordErrorElement).not.toBeInTheDocument()
+  userEvent.type(confirmPasswordInputElement, '123456');
+  userEvent.click(submitBtnElement);
+});
